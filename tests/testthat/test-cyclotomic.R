@@ -4,6 +4,12 @@ test_that("e(45)^5 == e(9)", {
   )
 })
 
+test_that("opposite", {
+  expect_true(
+    0 - zeta(14) == -zeta(14)
+  )
+})
+
 test_that("is Gaussian?", {
   im <- zeta(4)
   a <- as.cyclotomic(5)
@@ -24,6 +30,12 @@ test_that("convert to complex", {
   )
 })
 
+test_that("square root", {
+  expect_true(
+    cycSqrt(60)^2 == 60
+  )
+})
+
 test_that("product square roots", {
   expect_true(
     cycSqrt(3) * cycSqrt(6) == cycSqrt(18)
@@ -34,6 +46,13 @@ test_that("ratio square roots", {
   rat <- "5/3"
   expect_true(
     cycSqrt(rat) == cycSqrt(5) / cycSqrt(3)
+  )
+})
+
+test_that("golden ratio as polynomial root", {
+  phi <- (1 + cycSqrt(5)) / 2
+  expect_true(
+    phi^2 - phi - 1 == 0
   )
 })
 
@@ -55,5 +74,11 @@ test_that("trigonometry", {
   )
   expect_true(
     imaginaryPart(z) == sinDeg(-30)
+  )
+})
+
+test_that("negative power", {
+  expect_true(
+    1 / zeta(9)^2 == zeta(9)^(-2)
   )
 })

@@ -75,7 +75,7 @@ factorise <- function(n) {
   if(n == 1L) {
     return(list(primes = integer(0L), k = integer(0L)))
   }
-  fctrs <- factors(as.vli(n), iter = 100L, output = "list")
+  fctrs <- factors(as.vli(n), iter = 10L, output = "list")
   if(is.vli(fctrs)) { # workaround: fctrs is not a list if only one factor
     fctrs <- list(fctrs)
   }
@@ -156,7 +156,8 @@ extraneousPowers <- function(n) {
     r <- removeExps(n, p, q)
     cbind(p, r)
   }, simplify = FALSE))
-  x[!duplicated(x), , drop = FALSE]
+  return(x)
+  #x[!duplicated(x), , drop = FALSE] # ça revient au même de faire unique(r)
 }
 
 convertToBase <- function(n, trms) {
@@ -186,15 +187,15 @@ equalReplacements <- function(p, r, cyc) {
 
 reduceByPrime <- function(p, cyc) { # p: integer; cyc: cyclotomic; output: cyclotomic
   n <- cyc@order
-  cfs <- as.bigq(integer(0L))
-  x <- equalReplacements(p, 0L, cyc)
-  r <- p
   nminusp <- n - p
+  cfs <- as.bigq(integer(0L))
+  r <- 0L
+  x <- equalReplacements(p, r, cyc)
   while(r <= nminusp && !is.null(x)) {
     rat <- as.bigq(x)
     cfs <- c(cfs, -rat)
-    x <- equalReplacements(p, r, cyc)
     r <- r + p
+    x <- equalReplacements(p, r, cyc)
   }
   if(is.null(x)) {
     return(cyc)
@@ -213,7 +214,7 @@ reduceByPrime <- function(p, cyc) { # p: integer; cyc: cyclotomic; output: cyclo
   new(
     "cyclotomic",
     order = ndivp,
-    terms = removeZeros(trms)
+    terms = trms
   )
 }
 
@@ -278,16 +279,19 @@ tryRational <- function(cyc) {
   }
 }
 
-tryReduce <- function(cyc) {
-  fctr <- factorise(cyc@order)
+squareFreeOddFactors <- function(n) {
+  fctr <- factorise(n)
   primes <- fctr[["primes"]]
   powers <- fctr[["k"]]
-  ok <- powers == 1L & primes != 2L
-  squareFreeOddFactors <- primes[ok]
-  if(length(squareFreeOddFactors) == 0L) {
+  primes[powers == 1L & primes != 2L]
+}
+
+tryReduce <- function(cyc) {
+  sfoFactors <- squareFreeOddFactors(cyc@order)
+  if(length(sfoFactors) == 0L) {
     return(cyc)
   }
-  Reduce(reduceByPrime, rev(squareFreeOddFactors), init = cyc, right = TRUE)
+  Reduce(reduceByPrime, sfoFactors, init = cyc, right = TRUE)
 }
 
 cyclotomic <- function(ord, trms) {

@@ -139,8 +139,8 @@ cyclotomic_arith_gmp <- function(e1, e2) {
     .Generic,
     "+" = e1 + as.cyclotomic(e2),
     "-" = e1 - as.cyclotomic(e2),
-    "*" = e1 * as.cyclotomic(e2),
-    "/" = e1 / as.cyclotomic(e2),
+    "*" = prodRatCyc(e2, e1),
+    "/" = prodRatCyc(1L/e2, e1),
     stop(gettextf(
       "Binary operator %s not defined for these two objects.", dQuote(.Generic)
     ))
@@ -152,8 +152,14 @@ cyclotomic_arith_numeric <- function(e1, e2) {
     .Generic,
     "+" = e1 + as.cyclotomic(e2),
     "-" = e1 - as.cyclotomic(e2),
-    "*" = e1 * as.cyclotomic(e2),
-    "/" = e1 / as.cyclotomic(e2),
+    "*" = {
+      stopifnot(isInteger(e2))
+      prodIntCyc(as.integer(e2), e1)
+    },
+    "/" = {
+      stopifnot(isInteger(e2))
+      prodRatCyc(as.bigq(1L, e2), e1)
+    },
     "^" = powerCyc(e1, e2),
     stop(gettextf(
       "Binary operator %s not defined for these two objects.", dQuote(.Generic)
@@ -166,8 +172,8 @@ gmp_arith_cyclotomic <- function(e1, e2) {
     .Generic,
     "+" = as.cyclotomic(e1) + e2,
     "-" = as.cyclotomic(e1) - e2,
-    "*" = as.cyclotomic(e1) * e2, # could also use prodRatCyc
-    "/" = as.cyclotomic(e1) / e2,
+    "*" = prodRatCyc(e1, e2),
+    "/" = prodRatCyc(e1, invCyc(e2)),
     stop(gettextf(
       "Binary operator %s not defined for these two objects.", dQuote(.Generic)
     ))
@@ -179,8 +185,14 @@ numeric_arith_cyclotomic <- function(e1, e2) {
     .Generic,
     "+" = as.cyclotomic(e1) + e2,
     "-" = as.cyclotomic(e1) - e2,
-    "*" = as.cyclotomic(e1) * e2,
-    "/" = as.cyclotomic(e1) / e2,
+    "*" = {
+      stopifnot(isInteger(e1))
+      prodIntCyc(as.integer(e1), e2)
+    },
+    "/" = {
+      stopifnot(isInteger(e1))
+      prodIntCyc(as.integer(e1), invCyc(e2))
+    },
     stop(gettextf(
       "Binary operator %s not defined for these two objects.", dQuote(.Generic)
     ))
@@ -256,7 +268,8 @@ setMethod(
       "==" = isZeroCyc(e1 - e2),
       "!=" = !isZeroCyc(e1 - e2),
       stop(gettextf(
-        "Comparison operator %s not defined for cyclotomic objects.", dQuote(.Generic)
+        "Comparison operator %s not defined for cyclotomic objects.",
+        dQuote(.Generic)
       ))
     )
   }

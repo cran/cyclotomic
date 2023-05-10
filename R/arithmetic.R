@@ -3,12 +3,17 @@ NULL
 
 ## | the zero cyclotomic number ####
 zeroCyc <- function() {
-  new("cyclotomic", order = "1", terms = intmap$new())
+  new("cyclotomic", order = 1L, terms = intmap$new())
 }
 
 ## | check if it's the zero cyclotomic number ####
 isZeroCyc <- function(cyc) {
   cyc@terms$size() == 0L
+}
+
+## | one as a cyclotomic number ####
+oneCyc <- function() {
+  new("cyclotomic", order = 1L, terms = intmap$new(0L, list(as.bigq(1L))))
 }
 
 ## | sum of two cyclotomic numbers ####
@@ -33,6 +38,8 @@ sumCyc <- function(cyc1, cyc2) {
 
 ## | product of two cyclotomic numbers ####
 prodCyc <- function(cyc1, cyc2) {
+  if(isZeroCyc(cyc1)) return(zeroCyc())
+  if(isZeroCyc(cyc2)) return(zeroCyc())
   o1    <- cyc1@order
   trms1 <- cyc1@terms
   o2    <- cyc2@order
@@ -44,12 +51,10 @@ prodCyc <- function(cyc1, cyc2) {
   keys2 <- trms2$keys()
   mp <- intmap$new()
   for(k1 in keys1) {
-    e1 <- k1
     c1 <- trms1$get(k1)
     for(k2 in keys2) {
-      e2 <- k2
       c2 <- trms2$get(k2)
-      k <- (m1*e1 + m2*e2) %% ord
+      k <- (m1*k1 + m2*k2) %% ord
       insertWith(`+`, mp, k, c1*c2)
     }
   }
@@ -62,15 +67,17 @@ powerCyc <- function(cyc, n) {
   if(n == 0L) {
     return(fromInteger(1L))
   }
-  if(n == 1L) {
-    return(cyc)
-  }
-  if(n > 0L) {
-    out <- cyc
-    for(. in 2L:n) {
-      out <- prodCyc(out, cyc)
+  if(n >= 1L) {
+    n <- n - 1L
+    result <- cyc
+    while(n) {
+      if(bitwAnd(n, 1L)) {
+        result <- prodCyc(result, cyc)
+      }
+      n <- bitwShiftR(n, 1L)
+      cyc <- prodCyc(cyc, cyc)
     }
-    return(out)
+    return(result)
   }
   # if n < 0:
   powerCyc(invCyc(cyc), -n)
@@ -87,6 +94,11 @@ prodRatCyc <- function(rat, cyc) {
       terms = mapValues(function(x) {rat * x}, cyc@terms)
     )
   }
+}
+
+## | product integer and cyclotomic ####
+prodIntCyc <- function(n, cyc) {
+  prodRatCyc(as.bigq(n), cyc)
 }
 
 ## | opposite of a cyclotomic number ####
@@ -116,7 +128,7 @@ productOfGaloisConjugates <- function(cyc) {
   ord <- cyc@order
   if(ord <= 2L) return(NULL)
   x <- seq(2L, length.out = ord - 2L)
-  coprimes <- as.list(x[coprime(x, ord)])
+  coprimes <- x[coprime(x, ord)]
   tomultiply <- lapply(coprimes, function(j) {
     multiplyExponents(j, cyc)
   })
