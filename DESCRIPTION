@@ -1,7 +1,7 @@
 Type: Package
 Package: cyclotomic
 Title: The Field of Cyclotomic Numbers
-Version: 1.1.0
+Version: 1.2.0
 Authors@R: c(
     person("Stéphane", "Laurent", , "laurent_step@outlook.fr", role = c("aut", "cre")),
     person("Scott N.", "Walck", role = "cph",
@@ -34,8 +34,8 @@ Collate: 'Cyclotomic.R' 'arithmetic.R' 'conjugate.R' 'imports.R' 'is.R'
 Suggests: testthat (>= 3.0.0)
 Config/testthat/edition: 3
 NeedsCompilation: no
-Packaged: 2023-05-10 12:06:41 UTC; stla
+Packaged: 2023-07-15 01:44:40 UTC; SDL96354
 Author: Stéphane Laurent [aut, cre],
   Scott N. Walck [cph] (author of the Haskell library 'cyclotomic')
 Repository: CRAN
-Date/Publication: 2023-05-10 12:20:02 UTC
+Date/Publication: 2023-07-15 07:50:02 UTC
